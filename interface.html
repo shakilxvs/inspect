@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Temporary Interface</title>
+  <style>
+    /* solid self-contained styling */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      /* hide any scrollbars so background presents as a single full-screen canvas */
+      overflow: hidden;
+    }
+
+    body {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      /* full-screen midnight blue background (keeps a sensible fallback when opened standalone) */
+      background: #13132e !important;
+      color: #fff !important;
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      min-height: 100vh;
+    }
+
+    .card {
+      max-width: 980px;
+      /* full-width up to max-width, with safe horizontal gutters on mobile */
+      width: 100%;
+      background: #000000;
+      border-radius: 14px;
+      padding: 48px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      text-align: center;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      margin: 0 20px;
+      box-sizing: border-box;
+    }
+
+    /* Heading: strong white */
+    h1 {
+      color: #ffffff;
+      margin: 6px 0 12px;
+      font-size: 36px;
+      line-height: 1.05;
+      font-weight: 800;
+      text-shadow: 0 8px 18px rgba(0,0,0,0.6);
+    }
+
+    p {
+      margin: 0 0 20px;
+      font-size: 18px;
+      color: rgba(255,255,255,0.95);
+    }
+
+    /* Red contact CTA */
+    .cta {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: 8px;
+      background: #ff0600;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 26px rgba(229,57,53,0.18);
+      border: none;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .cta:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(229,57,53,0.18); }
+
+    @media (max-width:600px) {
+      .card { padding: 26px; margin: 0 12px; }
+      h1 { font-size: 24px; }
+      p { font-size: 15px; }
+    }
+
+    /* safety for images/iframes inside card */
+    .card img, .card iframe { max-width:100%; height:auto; display:block; margin:0 auto; }
+  </style>
+</head>
+<body>
+  <div class="card" role="dialog" aria-modal="true">
+    <h1>Ahh Shit!</h1>
+    <p>Seems like the system messed up a bit. Contact Shakil to fix or forget it forever.</p>
+    <a class="cta" href="https://shakilxvs.wordpress.com/" target="_blank" rel="noopener noreferrer">CONTACT</a>
+  </div>
+</body>
+</html>
