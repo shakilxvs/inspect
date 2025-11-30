@@ -1,6 +1,6 @@
 😣 MTHD 1: Install that code 1 in theme.liquid (or similar) to show the message. Before </body>.
 
-✅ MTHD 2:  Make a code file inside the Asset folder & name it "sitespeed.js" & enter code 2 in the folder.
+✅ MTHD 2:  Make a code file inside the Asset folder & name it "inspect.js" & enter code 2 in the folder.
 Then go to theme.liquid (or similar) & past the code 3 before </body>
 
 ---------------------------
@@ -18,4 +18,4 @@ s.crossOrigin = "anonymous";
 document.head.appendChild(s);
 -----------------------------------
 Code 3:
-{{ 'sitespeed.js' | asset_url | script_tag }}
+{{ 'inspect.js' | asset_url | script_tag }}
