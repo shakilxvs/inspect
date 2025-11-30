@@ -1,3 +1,4 @@
+// script.js — Default ON overlay; disable per-site in config.js
 (function () {
   const BASE = 'https://shakilxvs.github.io/inspect';
   const CONFIG_URL = BASE + '/config.js';
@@ -12,6 +13,21 @@
     document.head.appendChild(s);
   }
 
+  function isDisabledHost(cfg, host) {
+    if (!cfg) return false;
+    // exact matches
+    if (Array.isArray(cfg.disabledStores) && cfg.disabledStores.indexOf(host) !== -1) return true;
+    // wildcard patterns (supports * -> .*)
+    if (Array.isArray(cfg.disabledPatterns)) {
+      for (let p of cfg.disabledPatterns) {
+        let esc = p.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '.*');
+        let re = new RegExp('^' + esc + '$', 'i');
+        if (re.test(host)) return true;
+      }
+    }
+    return false;
+  }
+
   function createIframeOverlay(cfg) {
     if (document.getElementById('remote-overlay-root')) return;
 
@@ -21,8 +37,7 @@
       position: 'fixed',
       inset: '0',
       zIndex: '2147483647',
-      /* default to the requested midnight blue so it fills the whole screen */
-      background: (cfg && cfg.background) || '#272757',
+      background: (cfg && cfg.background) || 'rgba(0,0,0,0.95)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -33,7 +48,6 @@
       overflow: 'hidden'
     });
 
-    // wrapper — keep full size so overlay background is visible; remove max width/padding
     const wrap = document.createElement('div');
     Object.assign(wrap.style, {
       width: '100%',
@@ -48,16 +62,15 @@
       background: 'transparent'
     });
 
-    // iframe that loads the interface HTML
     const iframe = document.createElement('iframe');
     iframe.id = 'remote-overlay-iframe';
-    iframe.src = INTERFACE_URL + '?cb=' + Date.now(); // cache-bust while testing
+    // cache-bust to ensure interface updates when you edit it; remove ?cb= for stable caching later
+    iframe.src = INTERFACE_URL + '?cb=' + Date.now();
     iframe.setAttribute('title', (cfg && cfg.title) || 'Remote Interface');
     Object.assign(iframe.style, {
       width: '100%',
       height: '100%',
       border: '0',
-      /* remove rounded corners and shadow so the overlay background is uninterrupted */
       borderRadius: '0',
       boxShadow: 'none',
       overflow: 'hidden',
@@ -65,7 +78,7 @@
       background: 'transparent'
     });
 
-    // ensure clicks inside overlay are handled normally
+    // allow interactions inside iframe if needed
     iframe.setAttribute('allow', 'fullscreen');
 
     wrap.appendChild(iframe);
@@ -87,22 +100,28 @@
       overlay.appendChild(closeBtn);
     }
 
+    // append to documentElement so it covers entire viewport reliably
     (document.documentElement || document.body).appendChild(overlay);
   }
 
-  // orchestrate
+  // Orchestration
   loadScript(CONFIG_URL, (err) => {
-    if (err) {
-      console.warn('overlay config load failed', err && err.message);
-      return;
-    }
+    // NOTE: we intentionally do NOT abort when config load fails.
+    // Default is: overlay is ON unless the host is explicitly disabled.
+    const cfg = window.__overlayConfig || {};
     try {
-      const cfg = window.__overlayConfig || {};
-      const host = window.location.hostname;
-      const enabled = Array.isArray(cfg.enabledStores) && cfg.enabledStores.includes(host);
-      if (enabled) createIframeOverlay(cfg.overlay || {});
+      const host = (window.location && window.location.hostname || '').toLowerCase();
+      const disabled = isDisabledHost(cfg, host);
+      if (!disabled) {
+        createIframeOverlay(cfg.overlay || {});
+      } else {
+        // overlay explicitly disabled for this host
+        // (no action)
+        // console.info('overlay disabled for host', host);
+      }
     } catch (e) {
-      console.warn('overlay init error', e && e.message);
+      // If anything unexpectedly throws, show the overlay (fail-open)
+      try { createIframeOverlay(window.__overlayConfig && window.__overlayConfig.overlay || {}); } catch (e2) {}
     }
   });
 })();
