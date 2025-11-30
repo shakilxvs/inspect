@@ -1,6 +1,5 @@
-// config.js — Exclusion-style config
-// Default behavior: overlay is ON wherever the loader script is present.
-// Add hostnames to disabledStores (or patterns to disabledPatterns) to disable.
+// Add URL to Remove the Warning
+// Remove URL to Show the Warning
 
 window.__overlayConfig = {
   "disabledStores": [
