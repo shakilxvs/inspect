@@ -8,12 +8,6 @@ window.__overlayConfig = {
     "noescapefightwear.com",
     "1yfsaz-kh.myshopify.com"
   ],
-  "disabledPatterns": [
-    // Optional wildcard patterns. Examples:
-    // "*.dev.example.com",
-    // "*.staging.example.com"
-    // "*.myshopify.com"
-  ],
   "overlay": {
     "title": "Temporary Interface",
     "subtitle": "This store is showing a temporary interface controlled from GitHub Pages.",
