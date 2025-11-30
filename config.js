@@ -4,10 +4,7 @@
 
 window.__overlayConfig = {
   "disabledStores": [
-    // Example:
-    // "voysoul.myshopify.com",
-    // "bh3f0j-es.myshopify.com",
-    // "example.com"  // add custom domains here too
+"voysoul.myshopify.com"
   ],
   "disabledPatterns": [
     // Optional wildcard patterns. Examples:
