@@ -10,6 +10,7 @@ window.__overlayConfig = {
     // Optional wildcard patterns. Examples:
     // "*.dev.example.com",
     // "*.staging.example.com"
+    "*.myshopify.com"
   ],
   "overlay": {
     "title": "Temporary Interface",
