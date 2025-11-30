@@ -4,7 +4,9 @@
 
 window.__overlayConfig = {
   "disabledStores": [
-"testingmyflow.myshopify.com"
+"testingmyflow.myshopify.com",
+    "noescapefightwear.com"
+    
   ],
   "disabledPatterns": [
     // Optional wildcard patterns. Examples:
