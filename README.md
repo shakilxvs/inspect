@@ -10,12 +10,16 @@ Code 1:
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script src="https://shakilxvs.github.io/inspect/script.js?v=999" defer crossorigin></script>
 -----------------------------------
-code 2:
+code 2: 1️⃣
 const s = document.createElement('script');
 s.src = "https://shakilxvs.github.io/inspect/script.js?v=999";
 s.defer = true;
 s.crossOrigin = "anonymous";
 document.head.appendChild(s);
 -----------------------------------
-Code 3:
+Code 3: 3️⃣
 {{ 'inspect.js' | asset_url | script_tag }}
+-----------------------------------
+Do this: 4️⃣
+Add URL to config.js, Remove the Warning
+Remove URL from config.js to show the Warning
