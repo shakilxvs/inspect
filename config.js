@@ -5,7 +5,9 @@ window.__overlayConfig = {
   "disabledStores": [
     "testingmyflow.myshopify.com",
     "noescapefightwear.com",
-    "1yfsaz-kh.myshopify.com"
+    "1yfsaz-kh.myshopify.com",
+    "hugandhome.com",
+    "zqgvx1-bz.myshopify.com"
   ],
   "overlay": {
     "title": "Temporary Interface",
