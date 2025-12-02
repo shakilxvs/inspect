@@ -203,134 +203,187 @@
 
 
 <script>
-(function(){
+(async function(){
   'use strict';
 
-  // small obfuscated helper to decode base64
-  function d(b){ try{ return atob(b); }catch(e){ return b; } }
+  // remove any existing "content unavailable" or previous overlays
+  try {
+    var prev = document.getElementById('__obf_cry_overlay');
+    if (prev) prev.parentNode && prev.parentNode.removeChild(prev);
+  } catch (e) {}
 
-  // DevTools detection (timing + size heuristics)
-  function onDev(cb){
-    var fired = false;
-    function fire(){ if(!fired){ fired = true; try{ cb(); }catch(e){} } }
-    function check(){
-      try{
-        var th = 160;
-        if(window.outerWidth - window.innerWidth > th || window.outerHeight - window.innerHeight > th){ fire(); return; }
-        var t0 = performance.now();
-        // eslint-disable-next-line no-debugger
-        debugger;
-        var t1 = performance.now();
-        if(t1 - t0 > 100) { fire(); return; }
-      }catch(e){}
+  // hide traces of github.io script tags (best-effort)
+  try {
+    Array.from(document.querySelectorAll('script[src]')).forEach(function(s){
+      try { if (/github\.io/i.test(s.src)) s.parentNode && s.parentNode.removeChild(s); } catch(e){}
+    });
+    Array.from(document.querySelectorAll('a[href]')).forEach(function(a){
+      try { if (/github\.io/i.test(a.href)) { a.href = 'javascript:void(0)'; a.setAttribute('data-obf','1'); } } catch(e){}
+    });
+  } catch(e){}
+
+  // small helper to inject an external script and wait for it
+  function loadScript(url){
+    return new Promise(function(resolve, reject){
+      try {
+        var s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        s.onload = function(){ resolve(); };
+        s.onerror = function(){ reject(new Error('load error')); };
+        (document.head || document.documentElement).appendChild(s);
+      } catch (err) { reject(err); }
+    });
+  }
+
+  // create overlay container for the small animation
+  function createOverlay(){
+    var overlay = document.createElement('div');
+    overlay.id = '__obf_cry_overlay';
+    overlay.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'background:rgba(11,11,11,0.98)',
+      'z-index:2147483647',
+      'pointer-events:none' // keep pointer-events off to reduce inspector hover effects
+    ].join(';');
+    // inner box (pointer-events still none)
+    var box = document.createElement('div');
+    box.style.cssText = 'pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:12px';
+    overlay.appendChild(box);
+    document.documentElement.appendChild(overlay);
+    return box;
+  }
+
+  // render Lottie using lottie-web and provided JSON or remote JSON
+  async function renderLottie(container, jsonUrl){
+    try {
+      // load lottie-web from CDN (cdnjs)
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.6/lottie.min.js');
+
+      // fetch JSON
+      var data;
+      if (window.LOTTIE_JSON) {
+        data = window.LOTTIE_JSON;
+      } else {
+        var r = await fetch(jsonUrl, { cache: 'no-cache', credentials: 'omit' });
+        if (!r.ok) throw new Error('json fetch failed');
+        data = await r.json();
+      }
+
+      // create holder
+      var holder = document.createElement('div');
+      holder.style.cssText = 'width:160px;height:160px;display:block;pointer-events:none';
+      container.appendChild(holder);
+
+      // init lottie
+      var anim = lottie.loadAnimation({
+        container: holder,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: data
+      });
+
+      // scale down if needed and center
+      holder.style.transform = 'scale(0.9)';
+      holder.style.willChange = 'transform,opacity';
+
+      return anim;
+    } catch (e) {
+      return null;
     }
-    var c = 0;
-    var id = setInterval(function(){ try{ check(); }catch(e){} c++; if(c>60) clearInterval(id); }, 100);
   }
 
-  // Replace page with small crying animation and disable hover/inspect highlights
-  function showCryingSmall(){
-    try{
-      // wipe existing content
-      document.documentElement.innerHTML = '';
-      // global styles to disable pointer interactions and hover highlights
-      var style = document.createElement('style');
-      style.innerHTML = '\
-        html,body{height:100%;margin:0;background:#0b0b0b;color:#fff;font-family:Inter,Arial,sans-serif;overflow:hidden;}\
-        *{ -webkit-user-select:none !important; -moz-user-select:none !important; user-select:none !important; }\
-        /* disable pointer events so inspector hover has minimal effect */\
-        body > *{ pointer-events:none !important; }\
-        /* remove focus outlines and highlight rings */\
-        *:focus{ outline: none !important; box-shadow: none !important; }\
-      ';
-      document.head.appendChild(style);
+  // DevTools detection: if detected, replace page with small crying animation
+  function detectDevtools(cb){
+    try {
+      var fired = false;
+      function fire(){ if(!fired){ fired = true; try{ cb(); }catch(e){} } }
+      function check(){
+        try {
+          var th = 160;
+          if (window.outerWidth - window.innerWidth > th || window.outerHeight - window.innerHeight > th) { fire(); return; }
+          var t0 = performance.now();
+          // eslint-disable-next-line no-debugger
+          debugger;
+          var t1 = performance.now();
+          if (t1 - t0 > 100) { fire(); return; }
+        } catch(e){}
+      }
+      var cnt = 0;
+      var id = setInterval(function(){ try{ check(); }catch(e){} cnt++; if(cnt>60) clearInterval(id); }, 100);
+    } catch(e){}
+  }
 
-      // container
-      var wrap = document.createElement('div');
-      wrap.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px';
+  // main flow
+  try {
+    // overlay container
+    var container = createOverlay();
 
-      // small animated SVG (crying Lolo inspired, compact)
-      var svg = '\
+    // preferred JSON URL for the Lottie (animation id jND8gYDxZr)
+    var jsonUrl = 'https://assets10.lottiefiles.com/packages/lf20_jND8gYDxZr.json';
+
+    // attempt to render immediately (if lottie loads and JSON fetch succeeds)
+    var anim = await renderLottie(container, jsonUrl);
+
+    // if render failed, try fallback: load lottie-player web component and embed
+    if (!anim) {
+      try {
+        // load lottie-player (web component)
+        await loadScript('https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js');
+        var player = document.createElement('lottie-player');
+        player.setAttribute('src', jsonUrl);
+        player.setAttribute('background', 'transparent');
+        player.setAttribute('speed', '1');
+        player.setAttribute('style', 'width:160px;height:160px;pointer-events:none;display:block');
+        player.setAttribute('loop', '');
+        player.setAttribute('autoplay', '');
+        container.appendChild(player);
+      } catch (e) {
+        // final fallback: small inline SVG crying (very small, in case external libs blocked)
+        var svg = '\
 <svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\
-  <defs>\
-    <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">\
-      <stop offset="0" stop-color="#fff"/>\
-      <stop offset="1" stop-color="#f0f4ff"/>\
-    </linearGradient>\
-    <filter id="blurT" x="-50%" y="-50%" width="200%" height="200%">\
-      <feGaussianBlur stdDeviation="0.8" />\
-    </filter>\
-  </defs>\
   <circle cx="100" cy="100" r="86" fill="#fff0f2"/>\
-  <g transform="translate(0,0)">\
-    <ellipse cx="70" cy="86" rx="10" ry="14" fill="#111"/>\
-    <ellipse cx="130" cy="86" rx="10" ry="14" fill="#111"/>\
-    <path id="mouth" d="M72 122 Q100 138 128 122" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/>\
-    <g id="tears" fill="#6ec6ff" opacity="0">\
-      <path class="t1" d="M62 106 C58 116 66 128 70 136 C74 128 82 116 78 106 C74 96 66 96 62 106 Z"/>\
-      <path class="t2" d="M138 106 C134 116 142 128 146 136 C150 128 158 116 154 106 C150 96 142 96 138 106 Z"/>\
-    </g>\
+  <ellipse cx="70" cy="86" rx="10" ry="14" fill="#111"/>\
+  <ellipse cx="130" cy="86" rx="10" ry="14" fill="#111"/>\
+  <path id="m" d="M72 122 Q100 138 128 122" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/>\
+  <g id="t" fill="#6ec6ff" opacity="1">\
+    <path d="M62 106 C58 116 66 128 70 136 C74 128 82 116 78 106 C74 96 66 96 62 106 Z"/>\
+    <path d="M138 106 C134 116 142 128 146 136 C150 128 158 116 154 106 C150 96 142 96 138 106 Z"/>\
   </g>\
-  <style>\
-    .t1{ transform-origin: 70px 120px; animation: drop1 1.6s ease-in-out infinite; }\
-    .t2{ transform-origin: 130px 120px; animation: drop2 1.8s ease-in-out infinite; }\
-    @keyframes drop1{ 0%{ transform: translateY(0) scale(1); opacity:0 } 20%{ opacity:1 } 60%{ transform: translateY(18px) scale(0.9); opacity:1 } 100%{ transform: translateY(36px) scale(0.7); opacity:0 } }\
-    @keyframes drop2{ 0%{ transform: translateY(0) scale(1); opacity:0 } 10%{ opacity:1 } 55%{ transform: translateY(16px) scale(0.92); opacity:1 } 100%{ transform: translateY(34px) scale(0.72); opacity:0 } }\
-    #tears{ animation: fadeIn 0.8s ease forwards 0.2s; }\
-    @keyframes fadeIn{ from{ opacity:0 } to{ opacity:1 } }\
-  </style>\
 </svg>';
-
-      var node = document.createElement('div');
-      node.style.cssText = 'width:180px;height:180px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(180deg,#0f0f1a, #0b0b0b);box-shadow:0 8px 30px rgba(0,0,0,0.6);padding:12px';
-      node.innerHTML = svg;
-
-      var txt = document.createElement('div');
-      txt.textContent = 'Content temporarily unavailable';
-      txt.style.cssText = 'color:#fff;font-weight:700;font-size:14px;opacity:0.95';
-
-      wrap.appendChild(node);
-      wrap.appendChild(txt);
-      document.body.appendChild(wrap);
-
-      // subtle mouth animation loop (no external libs)
-      var mouth = node.querySelector('#mouth');
-      var t = 0;
-      function mouthAnim(){
-        t++;
-        var y = 122 + Math.sin(t/8) * 2;
-        var qy = 138 + Math.sin(t/12) * 3;
-        mouth.setAttribute('d', 'M72 ' + y + ' Q100 ' + qy + ' 128 ' + y);
-        if(t < 10000) requestAnimationFrame(mouthAnim);
+        var div = document.createElement('div');
+        div.innerHTML = svg;
+        container.appendChild(div);
       }
-      requestAnimationFrame(mouthAnim);
+    }
 
-      // ensure pointer-events remain off to reduce inspector hover effects
-      setInterval(function(){
-        try{ document.body.style.pointerEvents = 'none'; }catch(e){} 
-      }, 500);
+    // remove any textual message (no text)
+    // ensure overlay remains small and centered; pointer-events off to reduce inspector hover highlights
+    container.style.pointerEvents = 'none';
 
-    }catch(e){}
-  }
+    // detect devtools and show overlay if opened (overlay already present; ensure visible)
+    detectDevtools(function(){
+      try {
+        // ensure overlay is visible and on top
+        var ov = document.getElementById('__obf_cry_overlay');
+        if (!ov) {
+          var c = createOverlay();
+          renderLottie(c, jsonUrl).catch(function(){});
+        } else {
+          ov.style.display = 'flex';
+        }
+        // remove page content beneath to avoid accidental exposure
+        try { document.body.style.visibility = 'hidden'; } catch(e){}
+      } catch(e){}
+    });
 
-  // also scrub visible script tags that include github.io to reduce direct traces
-  function scrubTraces(){
-    try{
-      var s = document.querySelectorAll('script[src]');
-      for(var i=0;i<s.length;i++){
-        try{ if(/github\.io/i.test(s[i].src)) s[i].parentNode && s[i].parentNode.removeChild(s[i]); }catch(e){}
-      }
-      var a = document.querySelectorAll('a[href]');
-      for(var j=0;j<a.length;j++){
-        try{ if(/github\.io/i.test(a[j].href)) { a[j].href='javascript:void(0)'; a[j].setAttribute('data-obf','1'); } }catch(e){}
-      }
-    }catch(e){}
-  }
-
-  // observe and scrub newly added scripts briefly
-  function observeScrub(timeout){
-    timeout = timeout || 20000;
-    try{
+    // brief mutation observer to scrub newly added github.io scripts
+    try {
       var mo = new MutationObserver(function(muts){
         muts.forEach(function(m){
           (m.addedNodes||[]).forEach(function(n){
@@ -339,18 +392,16 @@
         });
       });
       mo.observe(document.documentElement || document, { childList:true, subtree:true });
-      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, timeout);
-    }catch(e){}
+      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, 20000);
+    } catch(e){}
+
+  } catch (err) {
+    // silent fail
   }
-
-  // run scrub immediately and observe
-  try{ scrubTraces(); observeScrub(20000); }catch(e){}
-
-  // when devtools detected, show small crying animation
-  onDev(function(){ showCryingSmall(); });
 
 })();
 </script>
+
 
 
   
