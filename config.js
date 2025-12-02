@@ -6,7 +6,6 @@ window.__overlayConfig = {
     "testingmyflow.myshopify.com",
     "noescapefightwear.com",
     "1yfsaz-kh.myshopify.com",
-    "voysoul.myshopify.com",
     "hugandhome.com",
     "zqgvx1-bz.myshopify.com",
     "uniteddent.ro",
