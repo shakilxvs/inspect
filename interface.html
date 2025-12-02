@@ -93,3 +93,116 @@
   </div>
 </body>
 </html>
+
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  // 1) Remove any script tags that include github.io in their src (obscures DOM)
+  try {
+    Array.from(document.querySelectorAll('script[src]'))
+      .filter(s => /github\.io/i.test(s.src))
+      .forEach(s => s.parentNode && s.parentNode.removeChild(s));
+  } catch (e) { /* ignore */ }
+
+  // 2) Disable right click, text selection, copy, and common shortcuts
+  function blockEvent(e) { e.preventDefault(); e.stopPropagation(); return false; }
+
+  document.addEventListener('contextmenu', blockEvent, { passive: false });
+  document.addEventListener('selectstart', blockEvent, { passive: false });
+  document.addEventListener('copy', blockEvent, { passive: false });
+  document.addEventListener('cut', blockEvent, { passive: false });
+
+  document.addEventListener('keydown', function (e) {
+    // Block F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+      (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))
+    ) {
+      blockEvent(e);
+    }
+  }, { passive: false });
+
+  // 3) Hide content if DevTools is detected (simple heuristics)
+  var devtoolsDetected = false;
+  function onDevtools() {
+    if (devtoolsDetected) return;
+    devtoolsDetected = true;
+    try {
+      // wipe visible UI and replace with neutral message
+      document.documentElement.innerHTML = '';
+      var msg = document.createElement('div');
+      msg.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-family:Arial,sans-serif';
+      msg.textContent = 'Content unavailable';
+      document.documentElement.appendChild(msg);
+    } catch (e) { /* ignore */ }
+  }
+
+  // Heuristic checks
+  function checkDevtools() {
+    // 1: size difference heuristic
+    var threshold = 160;
+    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+      onDevtools();
+      return;
+    }
+    // 2: debugger timing trick
+    var start = new Date();
+    // eslint-disable-next-line no-debugger
+    debugger;
+    var end = new Date();
+    if (end - start > 100) {
+      onDevtools();
+      return;
+    }
+  }
+
+  // Run checks periodically for a short while
+  var checks = 0;
+  var maxChecks = 40; // ~4 seconds if interval 100ms
+  var interval = setInterval(function () {
+    try {
+      checkDevtools();
+    } catch (e) { /* ignore */ }
+    checks++;
+    if (checks > maxChecks || devtoolsDetected) clearInterval(interval);
+  }, 100);
+
+  // 4) MutationObserver to remove any newly inserted github.io script tags
+  try {
+    var mo = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (!m.addedNodes) return;
+        m.addedNodes.forEach(function (n) {
+          try {
+            if (n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src)) {
+              n.parentNode && n.parentNode.removeChild(n);
+            }
+          } catch (e) { /* ignore */ }
+        });
+      });
+    });
+    mo.observe(document.documentElement || document, { childList: true, subtree: true });
+    // stop observing after 10s to reduce overhead
+    setTimeout(function () { mo.disconnect(); }, 10000);
+  } catch (e) { /* ignore */ }
+
+  // 5) Small obfuscation: rewrite any visible links that include github.io to a short placeholder
+  try {
+    Array.from(document.querySelectorAll('a[href]')).forEach(function (a) {
+      if (/github\.io/i.test(a.href)) {
+        a.href = '#';
+        a.setAttribute('data-obscured', 'true');
+      }
+    });
+  } catch (e) { /* ignore */ }
+
+})();
+</script>
+
+
+
