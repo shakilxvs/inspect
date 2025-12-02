@@ -8,7 +8,10 @@ window.__overlayConfig = {
     "1yfsaz-kh.myshopify.com",
     "voysoul.myshopify.com",
     "hugandhome.com",
-    "zqgvx1-bz.myshopify.com"
+    "zqgvx1-bz.myshopify.com",
+    "uniteddent.ro",
+    "ppkhi5-g9.myshopify.com",
+    "uniteddent.myshopify.com"
   ],
   "overlay": {
     "title": "Temporary Interface",
