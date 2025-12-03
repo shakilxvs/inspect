@@ -12,7 +12,14 @@ window.__overlayConfig = {
     "ppkhi5-g9.myshopify.com",
     "uniteddent.myshopify.com",
     "happywinterzz.com",
-    "fyeps0-az.myshopify.com"
+    "fyeps0-az.myshopify.com",
+    // xaviour 1
+    "j77101-vh.myshopify.com",
+    "thegolfshop.online",
+    // xaviour 2
+    "vvydii-xa.myshopify.com",
+    "josiah-2246786.myshopify.com"
+    
   ],
   "overlay": {
     "title": "Temporary Interface",
