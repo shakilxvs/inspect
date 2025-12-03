@@ -29,3 +29,8 @@
   }
 })();
 </script>
+
+----------Or paste the following code----------
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script src="https://shakilxvs.github.io/inspect/script.js?v=999" defer crossorigin></script>
