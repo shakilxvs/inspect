@@ -203,154 +203,139 @@
 
 
 <script>
-(function(){
+(function () {
   'use strict';
 
-  // small obfuscated helper to decode base64
-  function d(b){ try{ return atob(b); }catch(e){ return b; } }
+  // Save original state so we can restore later
+  var _origVisibility = document.documentElement.style.visibility || '';
+  var _origBodyPointer = document.body.style.pointerEvents || '';
+  var _origConsole = {
+    log: console.log.bind(console),
+    info: console.info.bind(console),
+    warn: console.warn.bind(console),
+    error: console.error.bind(console),
+    debug: console.debug.bind(console),
+    clear: console.clear.bind(console)
+  };
 
-  // DevTools detection (timing + size heuristics)
-  function onDev(cb){
-    var fired = false;
-    function fire(){ if(!fired){ fired = true; try{ cb(); }catch(e){} } }
-    function check(){
-      try{
-        var th = 160;
-        if(window.outerWidth - window.innerWidth > th || window.outerHeight - window.innerHeight > th){ fire(); return; }
-        var t0 = performance.now();
-        // eslint-disable-next-line no-debugger
-        debugger;
-        var t1 = performance.now();
-        if(t1 - t0 > 100) { fire(); return; }
-      }catch(e){}
-    }
-    var c = 0;
-    var id = setInterval(function(){ try{ check(); }catch(e){} c++; if(c>60) clearInterval(id); }, 100);
+  var devtoolsOpen = false;
+  var clearConsoleInterval = null;
+  var suppressConsole = false;
+  var closedStreak = 0;
+  var OPEN_THRESHOLD = 1;      // immediate open detection
+  var CLOSED_STREAK_NEEDED = 6; // require several consecutive "closed" checks to restore
+
+  // Hide interface (non-destructive): make page invisible and disable pointer events
+  function hideInterface() {
+    try {
+      if (devtoolsOpen) return;
+      devtoolsOpen = true;
+      // hide visual content
+      document.documentElement.style.visibility = 'hidden';
+      document.body.style.pointerEvents = 'none';
+      // suppress console output and clear it repeatedly
+      suppressConsole = true;
+      try { console.clear(); } catch (e) {}
+      clearConsoleInterval = setInterval(function () {
+        try { console.clear(); } catch (e) {}
+      }, 300);
+      // override console methods to no-op
+      try {
+        console.log = console.info = console.warn = console.error = console.debug = function () {};
+      } catch (e) {}
+    } catch (e) {}
   }
 
-  // Replace page with small crying animation and disable hover/inspect highlights
-  function showCryingSmall(){
-    try{
-      // wipe existing content
-      document.documentElement.innerHTML = '';
-      // global styles to disable pointer interactions and hover highlights
-      var style = document.createElement('style');
-      style.innerHTML = '\
-        html,body{height:100%;margin:0;background:#0b0b0b;color:#fff;font-family:Inter,Arial,sans-serif;overflow:hidden;}\
-        *{ -webkit-user-select:none !important; -moz-user-select:none !important; user-select:none !important; }\
-        /* disable pointer events so inspector hover has minimal effect */\
-        body > *{ pointer-events:none !important; }\
-        /* remove focus outlines and highlight rings */\
-        *:focus{ outline: none !important; box-shadow: none !important; }\
-      ';
-      document.head.appendChild(style);
-
-      // container
-      var wrap = document.createElement('div');
-      wrap.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px';
-
-      // small animated SVG (crying Lolo inspired, compact)
-      var svg = '\
-<svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\
-  <defs>\
-    <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">\
-      <stop offset="0" stop-color="#fff"/>\
-      <stop offset="1" stop-color="#f0f4ff"/>\
-    </linearGradient>\
-    <filter id="blurT" x="-50%" y="-50%" width="200%" height="200%">\
-      <feGaussianBlur stdDeviation="0.8" />\
-    </filter>\
-  </defs>\
-  <circle cx="100" cy="100" r="86" fill="#fff0f2"/>\
-  <g transform="translate(0,0)">\
-    <ellipse cx="70" cy="86" rx="10" ry="14" fill="#111"/>\
-    <ellipse cx="130" cy="86" rx="10" ry="14" fill="#111"/>\
-    <path id="mouth" d="M72 122 Q100 138 128 122" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/>\
-    <g id="tears" fill="#6ec6ff" opacity="0">\
-      <path class="t1" d="M62 106 C58 116 66 128 70 136 C74 128 82 116 78 106 C74 96 66 96 62 106 Z"/>\
-      <path class="t2" d="M138 106 C134 116 142 128 146 136 C150 128 158 116 154 106 C150 96 142 96 138 106 Z"/>\
-    </g>\
-  </g>\
-  <style>\
-    .t1{ transform-origin: 70px 120px; animation: drop1 1.6s ease-in-out infinite; }\
-    .t2{ transform-origin: 130px 120px; animation: drop2 1.8s ease-in-out infinite; }\
-    @keyframes drop1{ 0%{ transform: translateY(0) scale(1); opacity:0 } 20%{ opacity:1 } 60%{ transform: translateY(18px) scale(0.9); opacity:1 } 100%{ transform: translateY(36px) scale(0.7); opacity:0 } }\
-    @keyframes drop2{ 0%{ transform: translateY(0) scale(1); opacity:0 } 10%{ opacity:1 } 55%{ transform: translateY(16px) scale(0.92); opacity:1 } 100%{ transform: translateY(34px) scale(0.72); opacity:0 } }\
-    #tears{ animation: fadeIn 0.8s ease forwards 0.2s; }\
-    @keyframes fadeIn{ from{ opacity:0 } to{ opacity:1 } }\
-  </style>\
-</svg>';
-
-      var node = document.createElement('div');
-      node.style.cssText = 'width:180px;height:180px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(180deg,#0f0f1a, #0b0b0b);box-shadow:0 8px 30px rgba(0,0,0,0.6);padding:12px';
-      node.innerHTML = svg;
-
-      var txt = document.createElement('div');
-      // txt.textContent = 'Content temporarily unavailable';
-      txt.style.cssText = 'color:#fff;font-weight:700;font-size:14px;opacity:0.95';
-
-      wrap.appendChild(node);
-      wrap.appendChild(txt);
-      document.body.appendChild(wrap);
-
-      // subtle mouth animation loop (no external libs)
-      var mouth = node.querySelector('#mouth');
-      var t = 0;
-      function mouthAnim(){
-        t++;
-        var y = 122 + Math.sin(t/8) * 2;
-        var qy = 138 + Math.sin(t/12) * 3;
-        mouth.setAttribute('d', 'M72 ' + y + ' Q100 ' + qy + ' 128 ' + y);
-        if(t < 10000) requestAnimationFrame(mouthAnim);
+  // Show interface: restore visibility and console
+  function showInterface() {
+    try {
+      if (!devtoolsOpen) return;
+      devtoolsOpen = false;
+      // restore visual content
+      document.documentElement.style.visibility = _origVisibility;
+      document.body.style.pointerEvents = _origBodyPointer;
+      // restore console
+      suppressConsole = false;
+      if (clearConsoleInterval) {
+        try { clearInterval(clearConsoleInterval); } catch (e) {}
+        clearConsoleInterval = null;
       }
-      requestAnimationFrame(mouthAnim);
-
-      // ensure pointer-events remain off to reduce inspector hover effects
-      setInterval(function(){
-        try{ document.body.style.pointerEvents = 'none'; }catch(e){} 
-      }, 500);
-
-    }catch(e){}
+      try {
+        console.log = _origConsole.log;
+        console.info = _origConsole.info;
+        console.warn = _origConsole.warn;
+        console.error = _origConsole.error;
+        console.debug = _origConsole.debug;
+        console.clear = _origConsole.clear;
+      } catch (e) {}
+      try { console.clear(); } catch (e) {}
+    } catch (e) {}
   }
 
-  // also scrub visible script tags that include github.io to reduce direct traces
-  function scrubTraces(){
-    try{
-      var s = document.querySelectorAll('script[src]');
-      for(var i=0;i<s.length;i++){
-        try{ if(/github\.io/i.test(s[i].src)) s[i].parentNode && s[i].parentNode.removeChild(s[i]); }catch(e){}
+  // Heuristic DevTools detection
+  function isDevtoolsOpenHeuristic() {
+    try {
+      // 1) size heuristic
+      var threshold = 160;
+      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+        return true;
       }
-      var a = document.querySelectorAll('a[href]');
-      for(var j=0;j<a.length;j++){
-        try{ if(/github\.io/i.test(a[j].href)) { a[j].href='javascript:void(0)'; a[j].setAttribute('data-obf','1'); } }catch(e){}
+      // 2) debugger timing trick
+      var start = performance.now();
+      // eslint-disable-next-line no-debugger
+      debugger;
+      var end = performance.now();
+      if (end - start > 100) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  // Polling loop to detect open/close and toggle interface accordingly
+  var checks = 0;
+  var pollInterval = setInterval(function () {
+    try {
+      var open = isDevtoolsOpenHeuristic();
+      if (open) {
+        closedStreak = 0;
+        hideInterface();
+      } else {
+        // accumulate closed streak to avoid flicker
+        closedStreak++;
+        if (closedStreak >= CLOSED_STREAK_NEEDED) {
+          showInterface();
+          closedStreak = 0;
+        }
       }
-    }catch(e){}
-  }
+      checks++;
+      // keep running indefinitely so it restores without refresh
+    } catch (e) {}
+  }, 200);
 
-  // observe and scrub newly added scripts briefly
-  function observeScrub(timeout){
-    timeout = timeout || 20000;
-    try{
-      var mo = new MutationObserver(function(muts){
-        muts.forEach(function(m){
-          (m.addedNodes||[]).forEach(function(n){
-            try{ if(n && n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src)) n.parentNode && n.parentNode.removeChild(n); }catch(e){}
-          });
-        });
-      });
-      mo.observe(document.documentElement || document, { childList:true, subtree:true });
-      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, timeout);
-    }catch(e){}
-  }
+  // Extra: also listen for visibilitychange and focus to help restore quickly
+  document.addEventListener('visibilitychange', function () {
+    try {
+      if (document.visibilityState === 'visible' && !isDevtoolsOpenHeuristic()) {
+        closedStreak = CLOSED_STREAK_NEEDED;
+      }
+    } catch (e) {}
+  });
 
-  // run scrub immediately and observe
-  try{ scrubTraces(); observeScrub(20000); }catch(e){}
+  window.addEventListener('focus', function () {
+    try {
+      if (!isDevtoolsOpenHeuristic()) {
+        closedStreak = CLOSED_STREAK_NEEDED;
+      }
+    } catch (e) {}
+  });
 
-  // when devtools detected, show small crying animation
-  onDev(function(){ showCryingSmall(); });
+  // Ensure initial state: if devtools already open on load, hide immediately
+  try {
+    if (isDevtoolsOpenHeuristic()) hideInterface();
+  } catch (e) {}
 
 })();
 </script>
+
 
 
 
