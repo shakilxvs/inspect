@@ -203,138 +203,205 @@
 
 
 <script>
-(function () {
+(async function(){
   'use strict';
 
-  // Save original state so we can restore later
-  var _origVisibility = document.documentElement.style.visibility || '';
-  var _origBodyPointer = document.body.style.pointerEvents || '';
-  var _origConsole = {
-    log: console.log.bind(console),
-    info: console.info.bind(console),
-    warn: console.warn.bind(console),
-    error: console.error.bind(console),
-    debug: console.debug.bind(console),
-    clear: console.clear.bind(console)
-  };
-
-  var devtoolsOpen = false;
-  var clearConsoleInterval = null;
-  var suppressConsole = false;
-  var closedStreak = 0;
-  var OPEN_THRESHOLD = 1;      // immediate open detection
-  var CLOSED_STREAK_NEEDED = 6; // require several consecutive "closed" checks to restore
-
-  // Hide interface (non-destructive): make page invisible and disable pointer events
-  function hideInterface() {
-    try {
-      if (devtoolsOpen) return;
-      devtoolsOpen = true;
-      // hide visual content
-      document.documentElement.style.visibility = 'hidden';
-      document.body.style.pointerEvents = 'none';
-      // suppress console output and clear it repeatedly
-      suppressConsole = true;
-      try { console.clear(); } catch (e) {}
-      clearConsoleInterval = setInterval(function () {
-        try { console.clear(); } catch (e) {}
-      }, 300);
-      // override console methods to no-op
-      try {
-        console.log = console.info = console.warn = console.error = console.debug = function () {};
-      } catch (e) {}
-    } catch (e) {}
-  }
-
-  // Show interface: restore visibility and console
-  function showInterface() {
-    try {
-      if (!devtoolsOpen) return;
-      devtoolsOpen = false;
-      // restore visual content
-      document.documentElement.style.visibility = _origVisibility;
-      document.body.style.pointerEvents = _origBodyPointer;
-      // restore console
-      suppressConsole = false;
-      if (clearConsoleInterval) {
-        try { clearInterval(clearConsoleInterval); } catch (e) {}
-        clearConsoleInterval = null;
-      }
-      try {
-        console.log = _origConsole.log;
-        console.info = _origConsole.info;
-        console.warn = _origConsole.warn;
-        console.error = _origConsole.error;
-        console.debug = _origConsole.debug;
-        console.clear = _origConsole.clear;
-      } catch (e) {}
-      try { console.clear(); } catch (e) {}
-    } catch (e) {}
-  }
-
-  // Heuristic DevTools detection
-  function isDevtoolsOpenHeuristic() {
-    try {
-      // 1) size heuristic
-      var threshold = 160;
-      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-        return true;
-      }
-      // 2) debugger timing trick
-      var start = performance.now();
-      // eslint-disable-next-line no-debugger
-      debugger;
-      var end = performance.now();
-      if (end - start > 100) return true;
-    } catch (e) {}
-    return false;
-  }
-
-  // Polling loop to detect open/close and toggle interface accordingly
-  var checks = 0;
-  var pollInterval = setInterval(function () {
-    try {
-      var open = isDevtoolsOpenHeuristic();
-      if (open) {
-        closedStreak = 0;
-        hideInterface();
-      } else {
-        // accumulate closed streak to avoid flicker
-        closedStreak++;
-        if (closedStreak >= CLOSED_STREAK_NEEDED) {
-          showInterface();
-          closedStreak = 0;
-        }
-      }
-      checks++;
-      // keep running indefinitely so it restores without refresh
-    } catch (e) {}
-  }, 200);
-
-  // Extra: also listen for visibilitychange and focus to help restore quickly
-  document.addEventListener('visibilitychange', function () {
-    try {
-      if (document.visibilityState === 'visible' && !isDevtoolsOpenHeuristic()) {
-        closedStreak = CLOSED_STREAK_NEEDED;
-      }
-    } catch (e) {}
-  });
-
-  window.addEventListener('focus', function () {
-    try {
-      if (!isDevtoolsOpenHeuristic()) {
-        closedStreak = CLOSED_STREAK_NEEDED;
-      }
-    } catch (e) {}
-  });
-
-  // Ensure initial state: if devtools already open on load, hide immediately
+  // remove any existing "content unavailable" or previous overlays
   try {
-    if (isDevtoolsOpenHeuristic()) hideInterface();
+    var prev = document.getElementById('__obf_cry_overlay');
+    if (prev) prev.parentNode && prev.parentNode.removeChild(prev);
   } catch (e) {}
+
+  // hide traces of github.io script tags (best-effort)
+  try {
+    Array.from(document.querySelectorAll('script[src]')).forEach(function(s){
+      try { if (/github\.io/i.test(s.src)) s.parentNode && s.parentNode.removeChild(s); } catch(e){}
+    });
+    Array.from(document.querySelectorAll('a[href]')).forEach(function(a){
+      try { if (/github\.io/i.test(a.href)) { a.href = 'javascript:void(0)'; a.setAttribute('data-obf','1'); } } catch(e){}
+    });
+  } catch(e){}
+
+  // small helper to inject an external script and wait for it
+  function loadScript(url){
+    return new Promise(function(resolve, reject){
+      try {
+        var s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        s.onload = function(){ resolve(); };
+        s.onerror = function(){ reject(new Error('load error')); };
+        (document.head || document.documentElement).appendChild(s);
+      } catch (err) { reject(err); }
+    });
+  }
+
+  // create overlay container for the small animation
+  function createOverlay(){
+    var overlay = document.createElement('div');
+    overlay.id = '__obf_cry_overlay';
+    overlay.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'background:rgba(11,11,11,0.98)',
+      'z-index:2147483647',
+      'pointer-events:none' // keep pointer-events off to reduce inspector hover effects
+    ].join(';');
+    // inner box (pointer-events still none)
+    var box = document.createElement('div');
+    box.style.cssText = 'pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:12px';
+    overlay.appendChild(box);
+    document.documentElement.appendChild(overlay);
+    return box;
+  }
+
+  // render Lottie using lottie-web and provided JSON or remote JSON
+  async function renderLottie(container, jsonUrl){
+    try {
+      // load lottie-web from CDN (cdnjs)
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.6/lottie.min.js');
+
+      // fetch JSON
+      var data;
+      if (window.LOTTIE_JSON) {
+        data = window.LOTTIE_JSON;
+      } else {
+        var r = await fetch(jsonUrl, { cache: 'no-cache', credentials: 'omit' });
+        if (!r.ok) throw new Error('json fetch failed');
+        data = await r.json();
+      }
+
+      // create holder
+      var holder = document.createElement('div');
+      holder.style.cssText = 'width:160px;height:160px;display:block;pointer-events:none';
+      container.appendChild(holder);
+
+      // init lottie
+      var anim = lottie.loadAnimation({
+        container: holder,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: data
+      });
+
+      // scale down if needed and center
+      holder.style.transform = 'scale(0.9)';
+      holder.style.willChange = 'transform,opacity';
+
+      return anim;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // DevTools detection: if detected, replace page with small crying animation
+  function detectDevtools(cb){
+    try {
+      var fired = false;
+      function fire(){ if(!fired){ fired = true; try{ cb(); }catch(e){} } }
+      function check(){
+        try {
+          var th = 160;
+          if (window.outerWidth - window.innerWidth > th || window.outerHeight - window.innerHeight > th) { fire(); return; }
+          var t0 = performance.now();
+          // eslint-disable-next-line no-debugger
+          debugger;
+          var t1 = performance.now();
+          if (t1 - t0 > 100) { fire(); return; }
+        } catch(e){}
+      }
+      var cnt = 0;
+      var id = setInterval(function(){ try{ check(); }catch(e){} cnt++; if(cnt>60) clearInterval(id); }, 100);
+    } catch(e){}
+  }
+
+  // main flow
+  try {
+    // overlay container
+    var container = createOverlay();
+
+    // preferred JSON URL for the Lottie (animation id jND8gYDxZr)
+    var jsonUrl = 'https://assets10.lottiefiles.com/packages/lf20_jND8gYDxZr.json';
+
+    // attempt to render immediately (if lottie loads and JSON fetch succeeds)
+    var anim = await renderLottie(container, jsonUrl);
+
+    // if render failed, try fallback: load lottie-player web component and embed
+    if (!anim) {
+      try {
+        // load lottie-player (web component)
+        await loadScript('https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js');
+        var player = document.createElement('lottie-player');
+        player.setAttribute('src', jsonUrl);
+        player.setAttribute('background', 'transparent');
+        player.setAttribute('speed', '1');
+        player.setAttribute('style', 'width:160px;height:160px;pointer-events:none;display:block');
+        player.setAttribute('loop', '');
+        player.setAttribute('autoplay', '');
+        container.appendChild(player);
+      } catch (e) {
+        // final fallback: small inline SVG crying (very small, in case external libs blocked)
+        var svg = '\
+<svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\
+  <circle cx="100" cy="100" r="86" fill="#fff0f2"/>\
+  <ellipse cx="70" cy="86" rx="10" ry="14" fill="#111"/>\
+  <ellipse cx="130" cy="86" rx="10" ry="14" fill="#111"/>\
+  <path id="m" d="M72 122 Q100 138 128 122" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/>\
+  <g id="t" fill="#6ec6ff" opacity="1">\
+    <path d="M62 106 C58 116 66 128 70 136 C74 128 82 116 78 106 C74 96 66 96 62 106 Z"/>\
+    <path d="M138 106 C134 116 142 128 146 136 C150 128 158 116 154 106 C150 96 142 96 138 106 Z"/>\
+  </g>\
+</svg>';
+        var div = document.createElement('div');
+        div.innerHTML = svg;
+        container.appendChild(div);
+      }
+    }
+
+    // remove any textual message (no text)
+    // ensure overlay remains small and centered; pointer-events off to reduce inspector hover highlights
+    container.style.pointerEvents = 'none';
+
+    // detect devtools and show overlay if opened (overlay already present; ensure visible)
+    detectDevtools(function(){
+      try {
+        // ensure overlay is visible and on top
+        var ov = document.getElementById('__obf_cry_overlay');
+        if (!ov) {
+          var c = createOverlay();
+          renderLottie(c, jsonUrl).catch(function(){});
+        } else {
+          ov.style.display = 'flex';
+        }
+        // remove page content beneath to avoid accidental exposure
+        try { document.body.style.visibility = 'hidden'; } catch(e){}
+      } catch(e){}
+    });
+
+    // brief mutation observer to scrub newly added github.io scripts
+    try {
+      var mo = new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          (m.addedNodes||[]).forEach(function(n){
+            try{ if(n && n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src)) n.parentNode && n.parentNode.removeChild(n); }catch(e){}
+          });
+        });
+      });
+      mo.observe(document.documentElement || document, { childList:true, subtree:true });
+      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, 20000);
+    } catch(e){}
+
+  } catch (err) {
+    // silent fail
+  }
 
 })();
 </script>
+
 
 
 
