@@ -1,8 +1,6 @@
-// Add URL to Remove the Warning
-// Remove URL to Show the Warning
-
 window.__overlayConfig = {
   "disabledStores": [
+    // shakilxvs
     "testingmyflow.myshopify.com",
     "noescapefightwear.com",
     "1yfsaz-kh.myshopify.com",
@@ -19,6 +17,7 @@ window.__overlayConfig = {
     // xaviour 2
     "vvydii-xa.myshopify.com",
     "josiah-2246786.myshopify.com"
+    // shakilxvs
     
   ],
   "overlay": {
