@@ -16,7 +16,9 @@ window.__overlayConfig = {
     "thegolfshop.online",
     // xaviour 2
     "vvydii-xa.myshopify.com",
-    "josiah-2246786.myshopify.com"
+    "josiah-2246786.myshopify.com",
+    "shop.11ocoffee.nl",
+    "vyxmam-r1.myshopify.com"
     // shakilxvs
     
   ],
