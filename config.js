@@ -18,8 +18,7 @@ window.__overlayConfig = {
     "vvydii-xa.myshopify.com",
     "josiah-2246786.myshopify.com",
     "shop.11ocoffee.nl",
-    "vyxmam-r1.myshopify.com",
-    "voysoul.myshopify.com"
+    "vyxmam-r1.myshopify.com"
     // shakilxvs
     
   ],
