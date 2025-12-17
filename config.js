@@ -1,28 +1,42 @@
 window.__overlayConfig = {
   "disabledStores": [
-    // shakilxvs
+    // test shop
     "testingmyflow.myshopify.com",
+    
+    // No escape
     "noescapefightwear.com",
     "1yfsaz-kh.myshopify.com",
+    
+    // Hug and Home
     "hugandhome.com",
     "zqgvx1-bz.myshopify.com",
+
+    // United dent
     "uniteddent.ro",
     "ppkhi5-g9.myshopify.com",
     "uniteddent.myshopify.com",
+
+    // Happy Winterzz
     "happywinterzz.com",
     "fyeps0-az.myshopify.com",
+    
     // xaviour 1
     "j77101-vh.myshopify.com",
     "thegolfshop.online",
+    
     // xaviour 2
     "vvydii-xa.myshopify.com",
     "josiah-2246786.myshopify.com",
+    
+    // 11 o coffee
     "shop.11ocoffee.nl",
     "vyxmam-r1.myshopify.com",
-    // shakilxvs FNDTN
+    
+    // FNDTN
     "bdfce2-f1.myshopify.com",
     "theboobjob.shop",
-    "thefndtn.shop"
+    "thefndtn.shop",
+    "the-boob-job-shop-c9042bc9607299348de6.o2.myshopify.dev"
     
     
   ],
