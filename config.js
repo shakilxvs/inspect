@@ -36,7 +36,12 @@ window.__overlayConfig = {
     "bdfce2-f1.myshopify.com",
     "theboobjob.shop",
     "thefndtn.shop",
-    "the-boob-job-shop-c9042bc9607299348de6.o2.myshopify.dev"
+    "the-boob-job-shop-c9042bc9607299348de6.o2.myshopify.dev",
+
+    // Pac3 Ai
+    "pac3ai.myshopify.com",
+    "iccfdq-dv.myshopify.com",
+    "pac3solutions.com"
     
     
   ],
