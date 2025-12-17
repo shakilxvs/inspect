@@ -18,8 +18,12 @@ window.__overlayConfig = {
     "vvydii-xa.myshopify.com",
     "josiah-2246786.myshopify.com",
     "shop.11ocoffee.nl",
-    "vyxmam-r1.myshopify.com"
-    // shakilxvs
+    "vyxmam-r1.myshopify.com",
+    // shakilxvs FNDTN
+    "bdfce2-f1.myshopify.com",
+    "theboobjob.shop",
+    "thefndtn.shop"
+    
     
   ],
   "overlay": {
