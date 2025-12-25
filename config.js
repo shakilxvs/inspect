@@ -2,6 +2,7 @@ window.__overlayConfig = {
   "disabledStores": [
     // test shop
     "testingmyflow.myshopify.com",
+    "voysoul.myshopify.com",
     
     // No escape
     "noescapefightwear.com",
