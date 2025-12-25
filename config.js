@@ -41,7 +41,10 @@ window.__overlayConfig = {
     // Pac3 Ai
     "pac3ai.myshopify.com",
     "iccfdq-dv.myshopify.com",
-    "pac3solutions.com"
+    "pac3solutions.com",
+
+    // Casabella US
+    "w4bu79-s0.myshopify.com"
     
     
   ],
