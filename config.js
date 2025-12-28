@@ -45,7 +45,11 @@ window.__overlayConfig = {
     "pac3solutions.com",
 
     // Casabella US
-    "w4bu79-s0.myshopify.com"
+    "w4bu79-s0.myshopify.com",
+
+    // Ella Jane London
+    "ellajanelondon.com",
+    "c1eu7y-fa.myshopify.com"
     
     
   ],
