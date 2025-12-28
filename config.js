@@ -22,16 +22,16 @@ window.__overlayConfig = {
     "fyeps0-az.myshopify.com",
     
     // xaviour 1
-    "j77101-vh.myshopify.com",
-    "thegolfshop.online",
+    // "j77101-vh.myshopify.com",
+    // "thegolfshop.online",
     
     // xaviour 2
     // "vvydii-xa.myshopify.com",
     // "josiah-2246786.myshopify.com",
     
     // 11 o coffee
-    // "shop.11ocoffee.nl",
-    // "vyxmam-r1.myshopify.com",
+    "shop.11ocoffee.nl",
+    "vyxmam-r1.myshopify.com",
     
     // FNDTN
     "bdfce2-f1.myshopify.com",
