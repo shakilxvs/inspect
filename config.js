@@ -47,6 +47,9 @@ window.__overlayConfig = {
     // Casabella US
     "w4bu79-s0.myshopify.com",
 
+    // Coffie Bazen
+    // "bh3f0j-es.myshopify.com"
+
     // Ella Jane London
     "ellajanelondon.com",
     "c1eu7y-fa.myshopify.com"
