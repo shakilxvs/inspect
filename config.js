@@ -54,7 +54,17 @@ window.__overlayConfig = {
 
     // Ella Jane London
     "ellajanelondon.com",
-    "c1eu7y-fa.myshopify.com"
+    "c1eu7y-fa.myshopify.com",
+
+    // Blissoles
+    "www.blissoles.com",
+    "comfortarch.com",
+    "www.comfortarch.com",
+    "blissoles.com",
+    "blissoles.nl",
+    "www.blissoles.nl",
+    "mail.blissoles.com",
+    "peizi0-zb.myshopify.com"
     
     
   ],
