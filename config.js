@@ -55,7 +55,9 @@ window.__overlayConfig = {
     "blissoles.nl",
     "www.blissoles.nl",
     "mail.blissoles.com",
-    "peizi0-zb.myshopify.com"
+    "peizi0-zb.myshopify.com",
+
+    "shakilxvs.myshopify.com"
     
     
   ],
