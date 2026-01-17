@@ -7,10 +7,6 @@ window.__overlayConfig = {
     // No escape
     "noescapefightwear.com",
     "1yfsaz-kh.myshopify.com",
-    
-    // Hug and Home
-    "hugandhome.com",
-    "zqgvx1-bz.myshopify.com",
 
     // United dent
     "uniteddent.ro",
@@ -44,13 +40,8 @@ window.__overlayConfig = {
     "iccfdq-dv.myshopify.com",
     "pac3solutions.com",
 
-    // Casabella US
-    "w4bu79-s0.myshopify.com",
-    "casabellaus.myshopify.com",
-    "casabellaus.com",
-
     // Coffie Bazen
-    // "bh3f0j-es.myshopify.com"
+    // "bh3f0j-es.myshopify.com",
 
     // Ella Jane London
     "ellajanelondon.com",
