@@ -68,13 +68,13 @@ window.__overlayConfig = {
     "www.humora.nl",
     "humora-new.myshopify.com",
     "izsamn-x4.myshopify.com",
-    "humora.nl"
+    "humora.nl",
 
 
 
 
     
-    
+    "shakilxvs.myshopify.com"
   ],
   "overlay": {
     "title": "Temporary Interface",
