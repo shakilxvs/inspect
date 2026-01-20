@@ -57,8 +57,12 @@ window.__overlayConfig = {
     "mail.blissoles.com",
     "peizi0-zb.myshopify.com",
 
-    "shakilxvs.myshopify.com"
-    
+// HHE Reza
+    "www.humora.nl",
+    "www.navavento.com",
+    "navavento.com",
+    "gtzhck-ic.myshopify.com",
+    "humora.nl"
     
   ],
   "overlay": {
