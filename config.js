@@ -62,7 +62,18 @@ window.__overlayConfig = {
     "www.navavento.com",
     "navavento.com",
     "gtzhck-ic.myshopify.com",
+    "humora.nl",
+
+    // Humora home energy
+    "www.humora.nl",
+    "humora-new.myshopify.com",
+    "izsamn-x4.myshopify.com",
     "humora.nl"
+
+
+
+
+    
     
   ],
   "overlay": {
