@@ -70,6 +70,12 @@ window.__overlayConfig = {
     "izsamn-x4.myshopify.com",
     "humora.nl",
 
+    // Nistoria
+    "nistoria.com",
+    "nistoria.myshopify.com",
+    "www.nistoria.com",
+    
+
 
 
 
