@@ -75,6 +75,8 @@ window.__overlayConfig = {
     "nistoria.com",
     "nistoria.myshopify.com",
     "www.nistoria.com",
+
+    // Hartley & Harbour
     "hartleyandharbour.com",
     
 
