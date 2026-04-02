@@ -79,6 +79,7 @@ window.__overlayConfig = {
     // Hartley & Harbour
     "hartleyandharbour.com",
     "https://admin.shopify.com/store/1hsxec-0x/themes/194260599124/editor?previewMode=mobile&previewPath=%2Fproducts%2Fabbie",
+    "https://admin.shopify.com/store/1hsxec-0x/themes/194260599124/editor?previewPath=%2Fproducts%2Fabbie&section=template--28303871312212__main",
     
 
 
