@@ -1,363 +1,289 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Temporary Interface</title>
-  <style>
-    /* solid self-contained styling */
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      /* hide any scrollbars so background presents as a single full-screen canvas */
-      overflow: hidden;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>License Check Failed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;800&display=swap');
 
-    body {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      /* full-screen midnight blue background (keeps a sensible fallback when opened standalone) */
-      background: #13132e !important;
-      color: #fff !important;
-      font-family: "Inter", "Helvetica Neue", Arial, sans-serif !important;
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
-      min-height: 100vh;
-    }
+  :root{
+    --ink:#0a0a0d;
+    --panel:#131318;
+    --panel-2:#1a1a21;
+    --hair:#2a2a33;
+    --paper:#efece4;
+    --dim:#8b8b96;
+    --amber:#f5a623;
+    --amber-dim:#8a5e1c;
+    --danger:#e8503a;
+  }
 
-    .card {
-      max-width: 980px;
-      /* full-width up to max-width, with safe horizontal gutters on mobile */
-      width: 100%;
-      background: #000000;
-      border-radius: 14px;
-      padding: 48px;
-      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-      text-align: center;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      margin: 0 20px;
-      box-sizing: border-box;
-    }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;margin:0;padding:0;overflow:hidden;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    display:flex;align-items:center;justify-content:center;min-height:100vh;
+    position:relative;
+    background:var(--ink);
+  }
+  /* animated dark gradient wash, slow and ambient — deep navy to electric blue */
+  body::after{
+    content:"";position:fixed;inset:-10%;pointer-events:none;z-index:0;
+    background:
+      linear-gradient(135deg, #000000 0%, #05061a 22%, #0a0f3d 45%, #0d1466 65%, #1220c9 88%, #1e3bff 100%);
+    background-size:220% 220%;
+    animation:drift 26s ease-in-out infinite;
+  }
+  @keyframes drift{
+    0%{background-position:20% 10%;}
+    50%{background-position:80% 90%;}
+    100%{background-position:20% 10%;}
+  }
+  /* scanline texture, ambient, quiet */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode:overlay;
+  }
+  .frame{position:relative;z-index:2;}
 
-    /* Heading: strong white */
-    h1 {
-      color: #ffffff;
-      margin: 6px 0 12px;
-      font-size: 36px;
-      line-height: 1.05;
-      font-weight: 800;
-      text-shadow: 0 8px 18px rgba(0,0,0,0.6);
-    }
+  .frame{
+    position:relative;width:100%;max-width:620px;margin:0 20px;
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--hair);
+    border-radius:4px;
+    box-shadow:0 30px 80px rgba(0,0,0,0.55);
+    overflow:hidden;
+  }
 
-    p {
-      margin: 0 0 20px;
-      font-size: 18px;
-      color: rgba(255,255,255,0.95);
-    }
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 18px;border-bottom:1px solid var(--hair);
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--dim);
+  }
+  .topbar .dot{width:7px;height:7px;border-radius:50%;background:var(--danger);display:inline-block;margin-right:8px;box-shadow:0 0 10px rgba(232,80,58,.7);animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-    /* Red contact CTA */
-    .cta {
-      display: inline-block;
-      padding: 12px 22px;
-      border-radius: 8px;
-      background: #ff0600;
-      color: #fff;
-      text-decoration: none;
-      font-weight: 700;
-      box-shadow: 0 8px 26px rgba(229,57,53,0.18);
-      border: none;
-      cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    .cta:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(229,57,53,0.18); }
+  .body-pad{padding:38px 34px 30px;position:relative;}
 
-    @media (max-width:600px) {
-      .card { padding: 26px; margin: 0 12px; }
-      h1 { font-size: 24px; }
-      p { font-size: 15px; }
-    }
+  /* signature element: rotated stamp */
+  .stamp{
+    position:absolute;top:26px;right:28px;
+    width:104px;height:104px;border-radius:50%;
+    border:2.5px solid var(--danger);
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-16deg);
+    color:var(--danger);
+    font-family:'JetBrains Mono',monospace;font-weight:800;font-size:11.5px;letter-spacing:.14em;
+    text-align:center;line-height:1.35;
+    opacity:.9;
+    box-shadow:0 0 0 1px rgba(232,80,58,.15) inset;
+  }
+  .stamp::before{
+    content:"";position:absolute;inset:6px;border:1px dashed rgba(232,80,58,.55);border-radius:50%;
+  }
 
-    /* safety for images/iframes inside card */
-    .card img, .card iframe { max-width:100%; height:auto; display:block; margin:0 auto; }
-  </style>
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:var(--amber);
+    text-transform:uppercase;margin-bottom:14px;
+  }
+
+  h1{
+    margin:0 0 14px;font-size:32px;line-height:1.08;font-weight:800;
+    letter-spacing:-0.01em;color:var(--paper);max-width:80%;
+  }
+
+  p.lead{
+    margin:0 0 22px;font-size:15.5px;line-height:1.55;color:#c9c7bd;max-width:92%;
+  }
+
+  .diag{
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9;
+    background:rgba(0,0,0,0.35);border:1px solid var(--hair);border-radius:3px;
+    padding:14px 16px;margin-bottom:26px;color:#c9c7bd;
+  }
+  .diag .row{display:flex;justify-content:space-between;gap:14px;}
+  .diag .k{color:var(--dim);}
+  .diag .v{color:var(--paper);text-align:right;word-break:break-all;}
+  .diag .v.bad{color:var(--danger);font-weight:700;}
+
+  .divider{height:1px;background:var(--hair);margin:0 0 24px;}
+
+  .ctas{display:flex;flex-direction:column;gap:10px;}
+  .cta-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .btn{
+    flex:1;min-width:150px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 16px;border-radius:3px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;
+    text-decoration:none;border:1px solid transparent;cursor:pointer;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.08);}
+  .btn:active{transform:translateY(0);}
+
+  .btn.primary{background:var(--amber);color:#1a1206;}
+  .btn.outline{background:transparent;border-color:var(--hair);color:var(--paper);}
+  .btn.outline:hover{border-color:var(--amber-dim);}
+  .btn svg{width:16px;height:16px;flex-shrink:0;}
+
+  .icon-only{
+    width:58px;height:58px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    color:#eef0ff;
+    text-decoration:none;
+    backdrop-filter:blur(6px);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .icon-only:hover{transform:translateY(-3px);background:rgba(255,255,255,0.12);}
+  .icon-only svg{width:24px;height:24px;}
+
+  .foot{
+    margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+  .foot a{color:var(--dim);text-decoration:none;border-bottom:1px dotted var(--hair);}
+  .foot a:hover{color:var(--amber);border-color:var(--amber-dim);}
+
+  @media (max-width:560px){
+    .body-pad{padding:30px 22px 24px;}
+    h1{font-size:25px;max-width:100%;}
+    .stamp{width:82px;height:82px;font-size:10px;top:20px;right:18px;}
+    .cta-row{flex-direction:column;}
+  }
+
+  ::selection{background:transparent;}
+</style>
 </head>
 <body>
-  <div class="card" role="dialog" aria-modal="true">
-    <h1>Ahh Shit!</h1>
-    <p>Seems like the system messed up a bit. Contact your dev to fix. It won't take long. Promise.</p>
-    <a class="cta" href="https://shakilxvs.wordpress.com/" target="_blank" rel="noopener noreferrer">CONTACT</a>
+
+  <div class="frame" role="dialog" aria-modal="true">
+    <div class="topbar">
+      <span><span class="dot"></span>LICENSE&nbsp;GUARD</span>
+      <span id="clock">SCAN&nbsp;COMPLETE</span>
+    </div>
+
+    <div class="body-pad">
+      <div class="stamp">VOID<br/>NO<br/>LICENSE</div>
+
+      <div class="eyebrow">Template Protection</div>
+      <h1>This copy isn't licensed.</h1>
+      <p class="lead">This template is a paid, licensed product. The build running on this domain didn't pass license verification, so it's been switched to this notice instead of your site. Get a license and it's back up in minutes.</p>
+
+      <div class="diag">
+        <div class="row"><span class="k">TEMPLATE</span><span class="v">XVS Build</span></div>
+        <div class="row"><span class="k">DOMAIN</span><span class="v" id="domain">—</span></div>
+        <div class="row"><span class="k">LICENSE STATUS</span><span class="v bad">INVALID / NOT FOUND</span></div>
+        <div class="row"><span class="k">CHECKED</span><span class="v" id="stamp-time">—</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ctas">
+        <div class="cta-row">
+          <a class="btn primary" target="_blank" rel="noopener noreferrer"
+             href="https://wa.link/vsvq51"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>Activate on WhatsApp</a>
+          <a class="btn outline" href="tel:+8801722088158"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>Call +880 1722-088158</a>
+        </div>
+        <div class="cta-row">
+          <a class="btn outline" target="_blank" rel="noopener noreferrer" href="https://shakilxvs.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>shakilxvs.com</a>
+          <a class="btn outline" target="_blank" rel="noopener noreferrer" href="https://shakilxvs.com/contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>Contact</a>
+        </div>
+        <a class="btn outline" style="width:100%"
+           href="mailto:shakilxvs@gmail.com?subject=License%20activation%20request&body=Hey%2C%20I%E2%80%99d%20like%20to%20activate%20a%20license%20for%20my%20store.%0AMy%20store%20URL%20is%3A%20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Email shakilxvs@gmail.com
+        </a>
+      </div>
+
+      <div class="foot">
+        <span>Unlicensed use is not permitted.</span>
+        <a href="https://shakilxvs.com" target="_blank" rel="noopener noreferrer">shakilxvs.com</a>
+      </div>
+    </div>
   </div>
-
-<script>
-(function () {
-  'use strict';
-
-  // 1) Remove any script tags that include github.io in their src (obscures DOM)
-  try {
-    Array.from(document.querySelectorAll('script[src]'))
-      .filter(s => /github\.io/i.test(s.src))
-      .forEach(s => s.parentNode && s.parentNode.removeChild(s));
-  } catch (e) { /* ignore */ }
-
-  // 2) Disable right click, text selection, copy, and common shortcuts
-  function blockEvent(e) { e.preventDefault(); e.stopPropagation(); return false; }
-
-  document.addEventListener('contextmenu', blockEvent, { passive: false });
-  document.addEventListener('selectstart', blockEvent, { passive: false });
-  document.addEventListener('copy', blockEvent, { passive: false });
-  document.addEventListener('cut', blockEvent, { passive: false });
-
-  document.addEventListener('keydown', function (e) {
-    // Block F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P
-    if (
-      e.key === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-      (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))
-    ) {
-      blockEvent(e);
-    }
-  }, { passive: false });
-
-  // 3) Hide content if DevTools is detected (simple heuristics)
-  var devtoolsDetected = false;
-  function onDevtools() {
-    if (devtoolsDetected) return;
-    devtoolsDetected = true;
-    try {
-      // wipe visible UI and replace with neutral message
-      document.documentElement.innerHTML = '';
-      var msg = document.createElement('div');
-      msg.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-family:Arial,sans-serif';
-      msg.textContent = 'Content unavailable';
-      document.documentElement.appendChild(msg);
-    } catch (e) { /* ignore */ }
-  }
-
-  // Heuristic checks
-  function checkDevtools() {
-    // 1: size difference heuristic
-    var threshold = 160;
-    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-      onDevtools();
-      return;
-    }
-    // 2: debugger timing trick
-    var start = new Date();
-    // eslint-disable-next-line no-debugger
-    debugger;
-    var end = new Date();
-    if (end - start > 100) {
-      onDevtools();
-      return;
-    }
-  }
-
-  // Run checks periodically for a short while
-  var checks = 0;
-  var maxChecks = 40; // ~4 seconds if interval 100ms
-  var interval = setInterval(function () {
-    try {
-      checkDevtools();
-    } catch (e) { /* ignore */ }
-    checks++;
-    if (checks > maxChecks || devtoolsDetected) clearInterval(interval);
-  }, 100);
-
-  // 4) MutationObserver to remove any newly inserted github.io script tags
-  try {
-    var mo = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (!m.addedNodes) return;
-        m.addedNodes.forEach(function (n) {
-          try {
-            if (n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src)) {
-              n.parentNode && n.parentNode.removeChild(n);
-            }
-          } catch (e) { /* ignore */ }
-        });
-      });
-    });
-    mo.observe(document.documentElement || document, { childList: true, subtree: true });
-    // stop observing after 10s to reduce overhead
-    setTimeout(function () { mo.disconnect(); }, 10000);
-  } catch (e) { /* ignore */ }
-
-  // 5) Small obfuscation: rewrite any visible links that include github.io to a short placeholder
-  try {
-    Array.from(document.querySelectorAll('a[href]')).forEach(function (a) {
-      if (/github\.io/i.test(a.href)) {
-        a.href = '#';
-        a.setAttribute('data-obscured', 'true');
-      }
-    });
-  } catch (e) { /* ignore */ }
-
-})();
-</script> 
-
-
-
 
 <script>
 (function(){
   'use strict';
 
-  // small obfuscated helper to decode base64
-  function d(b){ try{ return atob(b); }catch(e){ return b; } }
+  // fill in live diagnostic-looking values (purely cosmetic, read-only, nothing sent anywhere)
+  try{
+    document.getElementById('domain').textContent = window.location.hostname || 'unknown';
+    var now = new Date();
+    document.getElementById('stamp-time').textContent = now.toLocaleString();
+  }catch(e){}
 
-  // DevTools detection (timing + size heuristics)
-  function onDev(cb){
-    var fired = false;
-    function fire(){ if(!fired){ fired = true; try{ cb(); }catch(e){} } }
-    function check(){
-      try{
-        var th = 160;
-        if(window.outerWidth - window.innerWidth > th || window.outerHeight - window.innerHeight > th){ fire(); return; }
-        var t0 = performance.now();
-        // eslint-disable-next-line no-debugger
-        debugger;
-        var t1 = performance.now();
-        if(t1 - t0 > 100) { fire(); return; }
-      }catch(e){}
-    }
-    var c = 0;
-    var id = setInterval(function(){ try{ check(); }catch(e){} c++; if(c>60) clearInterval(id); }, 100);
-  }
+  // ---- basic deterrents (not real security, just friction) ----
+  function block(e){ e.preventDefault(); e.stopPropagation(); return false; }
+  document.addEventListener('contextmenu', block, {passive:false});
+  document.addEventListener('selectstart', block, {passive:false});
+  document.addEventListener('copy', block, {passive:false});
+  document.addEventListener('cut', block, {passive:false});
+  document.addEventListener('dragstart', block, {passive:false});
 
-  // Replace page with small crying animation and disable hover/inspect highlights
-  function showCryingSmall(){
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (
+      k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
+      (e.metaKey && e.altKey && (k === 'I' || k === 'J' || k === 'C')) || // mac devtools combos
+      (e.ctrlKey && (k === 'U' || k === 'S' || k === 'P')) ||
+      (e.metaKey && (k === 'U' || k === 'S' || k === 'P'))
+    ){ block(e); }
+  }, {passive:false});
+
+  // ---- devtools heuristic: swap to a calm fallback rather than trying to hide everything ----
+  var tripped = false;
+  function fallback(){
+    if (tripped) return;
+    tripped = true;
     try{
-      // wipe existing content
-      document.documentElement.innerHTML = '';
-      // global styles to disable pointer interactions and hover highlights
-      var style = document.createElement('style');
-      style.innerHTML = '\
-        html,body{height:100%;margin:0;background:#0b0b0b;color:#fff;font-family:Inter,Arial,sans-serif;overflow:hidden;}\
-        *{ -webkit-user-select:none !important; -moz-user-select:none !important; user-select:none !important; }\
-        /* disable pointer events so inspector hover has minimal effect */\
-        body > *{ pointer-events:none !important; }\
-        /* remove focus outlines and highlight rings */\
-        *:focus{ outline: none !important; box-shadow: none !important; }\
-      ';
-      document.head.appendChild(style);
-
-      // container
-      var wrap = document.createElement('div');
-      wrap.style.cssText = 'height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px';
-
-      // small animated SVG (crying Lolo inspired, compact)
-      var svg = '\
-<svg width="160" height="160" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\
-  <defs>\
-    <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">\
-      <stop offset="0" stop-color="#fff"/>\
-      <stop offset="1" stop-color="#f0f4ff"/>\
-    </linearGradient>\
-    <filter id="blurT" x="-50%" y="-50%" width="200%" height="200%">\
-      <feGaussianBlur stdDeviation="0.8" />\
-    </filter>\
-  </defs>\
-  <circle cx="100" cy="100" r="86" fill="#fff0f2"/>\
-  <g transform="translate(0,0)">\
-    <ellipse cx="70" cy="86" rx="10" ry="14" fill="#111"/>\
-    <ellipse cx="130" cy="86" rx="10" ry="14" fill="#111"/>\
-    <path id="mouth" d="M72 122 Q100 138 128 122" stroke="#111" stroke-width="5" fill="none" stroke-linecap="round"/>\
-    <g id="tears" fill="#6ec6ff" opacity="0">\
-      <path class="t1" d="M62 106 C58 116 66 128 70 136 C74 128 82 116 78 106 C74 96 66 96 62 106 Z"/>\
-      <path class="t2" d="M138 106 C134 116 142 128 146 136 C150 128 158 116 154 106 C150 96 142 96 138 106 Z"/>\
-    </g>\
-  </g>\
-  <style>\
-    .t1{ transform-origin: 70px 120px; animation: drop1 1.6s ease-in-out infinite; }\
-    .t2{ transform-origin: 130px 120px; animation: drop2 1.8s ease-in-out infinite; }\
-    @keyframes drop1{ 0%{ transform: translateY(0) scale(1); opacity:0 } 20%{ opacity:1 } 60%{ transform: translateY(18px) scale(0.9); opacity:1 } 100%{ transform: translateY(36px) scale(0.7); opacity:0 } }\
-    @keyframes drop2{ 0%{ transform: translateY(0) scale(1); opacity:0 } 10%{ opacity:1 } 55%{ transform: translateY(16px) scale(0.92); opacity:1 } 100%{ transform: translateY(34px) scale(0.72); opacity:0 } }\
-    #tears{ animation: fadeIn 0.8s ease forwards 0.2s; }\
-    @keyframes fadeIn{ from{ opacity:0 } to{ opacity:1 } }\
-  </style>\
-</svg>';
-
-      var node = document.createElement('div');
-      node.style.cssText = 'width:180px;height:180px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(180deg,#0f0f1a, #0b0b0b);box-shadow:0 8px 30px rgba(0,0,0,0.6);padding:12px';
-      node.innerHTML = svg;
-
-      var txt = document.createElement('div');
-      // txt.textContent = 'Content temporarily unavailable';
-      txt.style.cssText = 'color:#fff;font-weight:700;font-size:14px;opacity:0.95';
-
-      wrap.appendChild(node);
-      wrap.appendChild(txt);
-      document.body.appendChild(wrap);
-
-      // subtle mouth animation loop (no external libs)
-      var mouth = node.querySelector('#mouth');
-      var t = 0;
-      function mouthAnim(){
-        t++;
-        var y = 122 + Math.sin(t/8) * 2;
-        var qy = 138 + Math.sin(t/12) * 3;
-        mouth.setAttribute('d', 'M72 ' + y + ' Q100 ' + qy + ' 128 ' + y);
-        if(t < 10000) requestAnimationFrame(mouthAnim);
-      }
-      requestAnimationFrame(mouthAnim);
-
-      // ensure pointer-events remain off to reduce inspector hover effects
-      setInterval(function(){
-        try{ document.body.style.pointerEvents = 'none'; }catch(e){} 
-      }, 500);
-
+      document.title = 'License Check Failed';
+      document.body.innerHTML =
+        '<div style="position:relative;z-index:5;height:100vh;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;padding:24px;">' +
+          '<a href="https://wa.link/vsvq51" target="_blank" rel="noopener noreferrer" class="icon-only" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></a>' +
+          '<a href="tel:+8801722088158" class="icon-only" aria-label="Call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg></a>' +
+          '<a href="mailto:shakilxvs@gmail.com?subject=License%20activation%20request&body=Hey%2C%20I%E2%80%99d%20like%20to%20activate%20a%20license%20for%20my%20store.%0AMy%20store%20URL%20is%3A%20" class="icon-only" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a>' +
+          '<a href="https://shakilxvs.com/contact" target="_blank" rel="noopener noreferrer" class="icon-only" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></a>' +
+          '<a href="https://shakilxvs.com" target="_blank" rel="noopener noreferrer" class="icon-only" aria-label="Website"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></a>' +
+        '</div>';
     }catch(e){}
   }
-
-  // also scrub visible script tags that include github.io to reduce direct traces
-  function scrubTraces(){
+  function check(){
     try{
-      var s = document.querySelectorAll('script[src]');
-      for(var i=0;i<s.length;i++){
-        try{ if(/github\.io/i.test(s[i].src)) s[i].parentNode && s[i].parentNode.removeChild(s[i]); }catch(e){}
+      var threshold = 160;
+      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold){
+        fallback(); return;
       }
-      var a = document.querySelectorAll('a[href]');
-      for(var j=0;j<a.length;j++){
-        try{ if(/github\.io/i.test(a[j].href)) { a[j].href='javascript:void(0)'; a[j].setAttribute('data-obf','1'); } }catch(e){}
-      }
+      var t0 = performance.now();
+      // eslint-disable-next-line no-debugger
+      debugger;
+      var t1 = performance.now();
+      if (t1 - t0 > 100){ fallback(); }
     }catch(e){}
   }
+  // keep checking indefinitely, not just for the first few seconds,
+  // so opening devtools later in the session still trips the fallback
+  var timer = setInterval(function(){
+    check();
+    if (tripped) clearInterval(timer);
+  }, 400);
 
-  // observe and scrub newly added scripts briefly
-  function observeScrub(timeout){
-    timeout = timeout || 20000;
-    try{
-      var mo = new MutationObserver(function(muts){
-        muts.forEach(function(m){
-          (m.addedNodes||[]).forEach(function(n){
-            try{ if(n && n.tagName === 'SCRIPT' && n.src && /github\.io/i.test(n.src)) n.parentNode && n.parentNode.removeChild(n); }catch(e){}
-          });
-        });
-      });
-      mo.observe(document.documentElement || document, { childList:true, subtree:true });
-      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, timeout);
-    }catch(e){}
-  }
-
-  // run scrub immediately and observe
-  try{ scrubTraces(); observeScrub(20000); }catch(e){}
-
-  // when devtools detected, show small crying animation
-  onDev(function(){ showCryingSmall(); });
+  // also re-arm a fresh watcher if something clears the interval unexpectedly
+  window.addEventListener('focus', function(){
+    if (!tripped) check();
+  });
 
 })();
 </script>
-
-
-
-
-
-
-
-  
 </body>
 </html>
