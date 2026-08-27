@@ -82,9 +82,9 @@ window.__overlayConfig = {
     "https://admin.shopify.com/store/1hsxec-0x/themes/194260599124/editor?previewPath=%2Fproducts%2Fabbie&section=template--28303871312212__main",
 
     // INTAYAH
-    // "www.intayah.com",
-    // "qj9cbu-mn.myshopify.com",
-    // "intayah.com",
+    "www.intayah.com",
+    "qj9cbu-mn.myshopify.com",
+    "intayah.com",
 
 
 
