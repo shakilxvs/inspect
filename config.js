@@ -83,8 +83,8 @@ window.__overlayConfig = {
 
     // INTAYAH
     "www.intayah.com",
-    "qj9cbu-mn.myshopify.com"
-    "intayah.com"
+    "qj9cbu-mn.myshopify.com",
+    "intayah.com",
 
 
 
